@@ -26,7 +26,7 @@ import javax.swing.table.DefaultTableModel;
  */
 public class ManagerMainPage extends javax.swing.JFrame {
     String branch;
-    String orderNum;
+    int orderNum;
     private ArrayList<Orderlist> olist = new ArrayList<>();
     private ArrayList<Stock> stockList = new ArrayList<>();
     private ArrayList<Sales> salesList = new ArrayList<>();
@@ -441,8 +441,8 @@ public class ManagerMainPage extends javax.swing.JFrame {
         if(nRow != -1 && nCol != -1){
             //해당 그거의 주문번호 받기
             Object num = listTable.getValueAt(nRow, 0);
-            orderNum = num.toString();
-            selectNum.setText(orderNum);
+            orderNum = (int) num;
+            selectNum.setText(String.valueOf(orderNum));
             //주문내역 나눠서보여주기
             String order = listTable.getValueAt(nRow, 1).toString();
             String[] orderDetail = order.split(", ");

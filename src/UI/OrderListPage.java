@@ -316,7 +316,7 @@ public class OrderListPage extends javax.swing.JFrame {
     private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
         //완료버튼
         //제작완료상태로 변경하기!
-        (new OrderlistDAO()).completeOrder(orderNum);
+        (new OrderlistDAO()).completeOrder(Integer.parseInt(orderNum));
         //판넬숨기고 리스트내역 새로 업데이트!
          showListTable();
          detailPanel.setVisible(false);

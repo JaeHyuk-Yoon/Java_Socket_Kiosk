@@ -4,6 +4,10 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
+
+import db.Orderlist;
+import db.OrderlistDAO;
+
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -12,9 +16,16 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.util.ArrayList;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 
 public class ManagerOrderListPanel extends JPanel {
 	private JTable table;
+	String branch;
+    String orderNum;
+	private ArrayList<Orderlist> list = new ArrayList<>();
+	String header[] = {"주문번호", "주문내역", "금액"};
 
 	/**
 	 * Create the panel.
@@ -73,37 +84,8 @@ public class ManagerOrderListPanel extends JPanel {
 		BorderNorthDetailPanel.add(CompleteMenuLabel);
 		
 		
-		String header[] = {"주문번호", "주문내역", "금액"};
-		String contents[][] = {
-				{"1", "burger", "10000"},
-				{"2", "burger2", "20000"},
-				{"1", "burger", "10000"}
-		};
-		String contents2[][] = {
-				{"1", "burger", "10000"},
-				{"2", "burger2", "20000"},
-				{"1", "burger", "10000"}
-		};
-		
-		
-		DefaultTableModel model = new DefaultTableModel(contents, header) {
-			 @Override
-			    public boolean isCellEditable(int row, int column) {
-			       //all cells false
-			       return false;
-			    }
-		};
-		
-		DefaultTableModel model2 = new DefaultTableModel(contents2, header) {
-			 @Override
-			    public boolean isCellEditable(int row, int column) {
-			       //all cells false
-			       return false;
-			    }
-		};
-		
-		JTable table = new JTable(model);
-		JTable table2 = new JTable(model2);
+		JTable table = new JTable(createTableModel1());
+		JTable table2 = new JTable(createTableModel2());
 		
 		JScrollPane scrollPane = new JScrollPane(table);
 		table.setFillsViewportHeight(true);
@@ -113,12 +95,83 @@ public class ManagerOrderListPanel extends JPanel {
 		scrollPane2.setPreferredSize(new Dimension(400, 125));
 		JButton CompeteMenuBtn = new JButton("메뉴준비 완료");
 		
+		//주문완료 버튼 클릭
+		CompeteMenuBtn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+
+				int line = table.getSelectedRow();
+				
+				int selectOrderNum = (int)table.getValueAt(line, 0);
+				
+				(new OrderlistDAO()).completeOrder(selectOrderNum);
+				
+				DefaultTableModel tableModel = (DefaultTableModel) table.getModel();
+				tableModel.setRowCount(0);
+				DefaultTableModel tableModel2 = (DefaultTableModel) table2.getModel();
+				tableModel2.setRowCount(0);
+			
+				table.setModel(createTableModel1());
+				table2.setModel(createTableModel2());
+			}
+		});
+		
 		this.add(CompeteMenuBtn, BorderLayout.SOUTH);
 		BorderCenterPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 10));
 		
 		BorderCenterPanel1.add(scrollPane);
 		BorderCenterPanel2.add(scrollPane2);
 
+	}
+	
+	
+	public DefaultTableModel createTableModel1(){
+		
+		DefaultTableModel model = new DefaultTableModel(header, 0) {
+			 @Override
+			    public boolean isCellEditable(int row, int column) {
+			       //all cells false
+			       return false;
+			    }
+		};
+		
+		//나중에 바꾸기
+        branch = "919";
+        
+		//model = (DefaultTableModel) table.getModel();
+        list = (new OrderlistDAO()).getList(branch);
+        for(int i = 0;i<list.size();i++){
+            model.addRow(new Object[]{
+                list.get(i).getOrdernum(),
+                list.get(i).getMenu(),
+                list.get(i).getPrice()
+            });
+        }
+        
+        return model;
+	}
+	
+	public DefaultTableModel createTableModel2(){
+		DefaultTableModel model2 = new DefaultTableModel(header, 0) {
+			 @Override
+			    public boolean isCellEditable(int row, int column) {
+			       //all cells false
+			       return false;
+			    }
+		};
+		
+		//나중에 바꾸기
+        branch = "919";
+        
+		//model2 = (DefaultTableModel) table.getModel();
+        list = (new OrderlistDAO()).getCompleteList(branch);
+        for(int i = 0;i<list.size();i++){
+            model2.addRow(new Object[]{
+                list.get(i).getOrdernum(),
+                list.get(i).getMenu(),
+                list.get(i).getPrice()
+            });
+        }
+        return model2;
 	}
 
 }
