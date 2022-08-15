@@ -30,6 +30,8 @@ public class ManagerOrderListPanel extends JPanel {
 	/**
 	 * Create the panel.
 	 */
+	
+	
 	public ManagerOrderListPanel() {
 		
 		JPanel BorderNorthPanel = new JPanel();

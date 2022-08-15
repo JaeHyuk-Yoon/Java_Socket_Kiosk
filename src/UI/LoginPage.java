@@ -117,6 +117,7 @@ public class LoginPage extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    //로그인 버튼
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         try {
             // TODO add your handling code here:
@@ -127,8 +128,8 @@ public class LoginPage extends javax.swing.JFrame {
             if(confirm>0){
                     branch = userDAO.user.getBranch();
                 if (confirm == 1) {//관리자 로그인
-                    ManagerMainPage mmg = new ManagerMainPage(branch);
-                    mmg.setVisible(true);
+                	ManagerOrderListPage molg = new ManagerOrderListPage(branch);
+                    molg.setVisible(true);
                     this.dispose();
 
                 }

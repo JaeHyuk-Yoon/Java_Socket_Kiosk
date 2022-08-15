@@ -40,7 +40,12 @@ public class ManagerOrderListPage extends JFrame {
 	/**
 	 * Create the frame.
 	 */
+	
 	public ManagerOrderListPage() {
+		System.out.println("Session out");
+	}
+	
+	public ManagerOrderListPage(String branch) {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setSize(1000,600);
 		setLocationRelativeTo(null);
