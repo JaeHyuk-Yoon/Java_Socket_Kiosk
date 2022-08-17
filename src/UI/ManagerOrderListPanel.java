@@ -5,6 +5,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
+import socket.Info;
+import socket.InfoDTO;
 import db.Orderlist;
 import db.OrderlistDAO;
 
@@ -18,19 +20,33 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.util.ArrayList;
 import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.Socket;
+import java.net.UnknownHostException;
+import java.sql.ClientInfoStatus;
 import java.awt.event.ActionEvent;
 
-public class ManagerOrderListPanel extends JPanel {
-	private JTable table;
+public class ManagerOrderListPanel extends JPanel implements Runnable {
+	private JTable table1;
+	private JTable table2;
 	private String branch;
     String orderNum;
+    private Socket socket;
+	private ObjectInputStream reader=null;
+	private ObjectOutputStream writer=null; 
+	private String serverIP;
 	private ArrayList<Orderlist> list = new ArrayList<>();
 	String header[] = {"주문번호", "주문내역", "금액"};
+	
+	
+	
+	
 
 	/**
 	 * Create the panel.
 	 */
-	
 	
 	public ManagerOrderListPanel() {
 		
@@ -86,11 +102,11 @@ public class ManagerOrderListPanel extends JPanel {
 		BorderNorthDetailPanel.add(CompleteMenuLabel);
 		
 		
-		JTable table = new JTable(createTableModel1());
+		JTable table1 = new JTable(createTableModel1());
 		JTable table2 = new JTable(createTableModel2());
 		
-		JScrollPane scrollPane = new JScrollPane(table);
-		table.setFillsViewportHeight(true);
+		JScrollPane scrollPane = new JScrollPane(table1);
+		table1.setFillsViewportHeight(true);
 		scrollPane.setPreferredSize(new Dimension(400, 125));
 		JScrollPane scrollPane2 = new JScrollPane(table2);
 		table2.setFillsViewportHeight(true);
@@ -101,18 +117,18 @@ public class ManagerOrderListPanel extends JPanel {
 		CompeteMenuBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 
-				int line = table.getSelectedRow();
+				int line = table1.getSelectedRow();
 				
-				int selectOrderNum = (int)table.getValueAt(line, 0);
+				int selectOrderNum = (int)table1.getValueAt(line, 0);
 				
 				(new OrderlistDAO()).completeOrder(selectOrderNum);
 				
-				DefaultTableModel tableModel = (DefaultTableModel) table.getModel();
+				DefaultTableModel tableModel = (DefaultTableModel) table1.getModel();
 				tableModel.setRowCount(0);
 				DefaultTableModel tableModel2 = (DefaultTableModel) table2.getModel();
 				tableModel2.setRowCount(0);
 			
-				table.setModel(createTableModel1());
+				table1.setModel(createTableModel1());
 				table2.setModel(createTableModel2());
 			}
 		});
@@ -122,6 +138,12 @@ public class ManagerOrderListPanel extends JPanel {
 		
 		BorderCenterPanel1.add(scrollPane);
 		BorderCenterPanel2.add(scrollPane2);
+		
+		serverIP = "113.198.235.233";
+		service();
+		
+		Thread t = new Thread(this);
+		t.start();
 
 	}
 	
@@ -181,11 +203,11 @@ public class ManagerOrderListPanel extends JPanel {
 		BorderNorthDetailPanel.add(CompleteMenuLabel);
 		
 		
-		JTable table = new JTable(createTableModel1());
-		JTable table2 = new JTable(createTableModel2());
+		table1 = new JTable(createTableModel1());
+		table2 = new JTable(createTableModel2());
 		
-		JScrollPane scrollPane = new JScrollPane(table);
-		table.setFillsViewportHeight(true);
+		JScrollPane scrollPane = new JScrollPane(table1);
+		table1.setFillsViewportHeight(true);
 		scrollPane.setPreferredSize(new Dimension(400, 125));
 		JScrollPane scrollPane2 = new JScrollPane(table2);
 		table2.setFillsViewportHeight(true);
@@ -196,18 +218,18 @@ public class ManagerOrderListPanel extends JPanel {
 		CompeteMenuBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 
-				int line = table.getSelectedRow();
+				int line = table1.getSelectedRow();
 				
-				int selectOrderNum = (int)table.getValueAt(line, 0);
+				int selectOrderNum = (int)table1.getValueAt(line, 0);
 				
 				(new OrderlistDAO()).completeOrder(selectOrderNum);
 				
-				DefaultTableModel tableModel = (DefaultTableModel) table.getModel();
+				DefaultTableModel tableModel = (DefaultTableModel) table1.getModel();
 				tableModel.setRowCount(0);
 				DefaultTableModel tableModel2 = (DefaultTableModel) table2.getModel();
 				tableModel2.setRowCount(0);
 			
-				table.setModel(createTableModel1());
+				table1.setModel(createTableModel1());
 				table2.setModel(createTableModel2());
 			}
 		});
@@ -217,8 +239,62 @@ public class ManagerOrderListPanel extends JPanel {
 		
 		BorderCenterPanel1.add(scrollPane);
 		BorderCenterPanel2.add(scrollPane2);
+		
+		serverIP = "113.198.235.233";
+		service();
 
 	}
+	
+	public void service(){
+		try{
+			socket = new Socket(serverIP,9500);
+			//에러 발생
+			reader= new ObjectInputStream(socket.getInputStream());
+			writer = new ObjectOutputStream(socket.getOutputStream());
+			System.out.println("전송 준비 완료!");
+			
+		} catch(UnknownHostException e ){
+			System.out.println("서버를 찾을 수 없습니다.");
+			e.printStackTrace();
+			System.exit(0);
+		} catch(IOException e){
+			System.out.println("서버와 연결이 안되었습니다.");
+			e.printStackTrace();
+			System.exit(0);
+		}
+		Thread t = new Thread(this);
+		t.start();
+	}
+	
+	//스레드 오버라이드 
+	@Override
+	public void run() {
+		//서버로부터 데이터 받기
+		InfoDTO dto= null;
+		while(true){
+			try{
+				dto = (InfoDTO) reader.readObject();
+				if(dto.getCommand()==Info.ORDER){
+					DefaultTableModel tableModel = (DefaultTableModel) table1.getModel();
+					tableModel.setRowCount(0);
+					DefaultTableModel tableModel2 = (DefaultTableModel) table2.getModel();
+					tableModel2.setRowCount(0);
+				
+					table1.setModel(createTableModel1());
+					table2.setModel(createTableModel2());
+					
+				}	
+			}catch(IOException e){
+				e.printStackTrace();
+			}catch(ClassNotFoundException e){
+				e.printStackTrace();
+			}	
+		}
+	}
+	
+	
+
+	
 	
 	
 	public DefaultTableModel createTableModel1(){

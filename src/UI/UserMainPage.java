@@ -20,6 +20,8 @@ import db.OrderlistDAO;
 import UI.ManagerMainPage;
 import UI.LoginPage;
 import UI.UserBurgerMenuPage;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
@@ -46,6 +48,8 @@ import src.FactoryPattern.BurgerStore;
 import src.FactoryPattern.GuilguBurgerStore;
 import src.FactoryPattern.SnGBurgerStore;
 import src.ObserverPattern.*;
+
+import socket.*;
 /**
  *
  * @author JaeHyuk
@@ -1361,6 +1365,7 @@ public class UserMainPage extends javax.swing.JFrame {
         totalcostLabel.setText(Integer.toString(totalcost));
         orderFrame.setVisible(true);
         this.dispose();
+        
     }//GEN-LAST:event_jButton5ActionPerformed
 
     private void deleteBActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteBActionPerformed
@@ -1463,6 +1468,9 @@ public class UserMainPage extends javax.swing.JFrame {
         //토핑창 닫고 메뉴창으로 돌아감
         this.setVisible(true);
         orderFrame.dispose();
+        
+        ClientObject co = new ClientObject();
+        co.OrderFrameBtn();
     }//GEN-LAST:event_completeOrderButtActionPerformed
 
     //toppingFrame 선택 취소 버튼
